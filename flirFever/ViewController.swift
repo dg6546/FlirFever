@@ -10,6 +10,12 @@ import UIKit
 class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataReceivedDelegate {
     let camera = FLIRCamera()
     let discovery = FLIRDiscovery()
+    var flip:Int = 0
+    @IBOutlet weak var cameraView: UIImageView!
+    
+    @IBOutlet weak var readingLabel: UILabel!
+    
+    @IBOutlet weak var statusText: UITextView!
     func cameraFound(_ cameraIdentity: FLIRIdentity) {
         if cameraIdentity.cameraType() == FLIRCameraType.flirOne{
             
@@ -54,28 +60,44 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
         camera.disconnect()
     }
     
-    func imageReceived() {
-        DispatchQueue.main.async{
-            self.statusText.text.append("Image received\n")
-            self.camera.withImage { (image: FLIRThermalImage) in
-                self.cameraView.image = image.getImage()
-                if image.measurements.measurementSpots.count == 0{
-                    image.measurements.addSpot(CGPoint(x: Int(image.getWidth())/2, y: Int(image.getHeight())/2))
-                }
-                let spot = image.measurements.measurementSpots.firstObject as? FLIRMeasurementSpot
-                //self.readingLabel.text = spot?.value.value() as? String
-                //print(spot?.value.value ?? "nil")
-                self.readingLabel.text = "\(String(format: "%.1f", spot?.value.value ?? 0))"
-            }
+    @IBAction func Flip(_ sender: Any) {
+        
+        if (flip==0){
+            flip = 1
+        }else{
+            flip = 0
         }
+    }
+    func imageReceived() {
+        DispatchQueue.global(qos: .default).async(execute: { [self] in
+            do{
+                self.camera.withImage({ (image:FLIRThermalImage!) in
+                let fusion:FLIRFusion! = image.getFusion()
+                    fusion.setFusionMode(VISUAL_MODE)
+                if self.flip==1 {
+                    let sourceImage:UIImage! = image.getImage()
+                    let flippedImage:UIImage! = UIImage(cgImage: sourceImage.cgImage!,
+                                                            scale:sourceImage.scale,
+                                                            orientation: UIImage.Orientation.upMirrored)
+                    self.cameraView.image = flippedImage
+                }else{
+                    self.cameraView.image = image.getImage()
+                }
+
+                    if image.measurements.measurementSpots.count==0{
+                        image.measurements.addSpot(CGPoint.init(x: Int(image.getWidth())/2, y: Int(image.getHeight())/2))
+                    }
+
+                    let spot:FLIRMeasurementSpot! = image.measurements.measurementSpots.firstObject as? FLIRMeasurementSpot
+                    self.readingLabel.text = String(format:"%.1f",spot.value)
+            })
+            }
+        })
+            
     }
 
     
-    @IBOutlet weak var cameraView: UIImageView!
-    
-    @IBOutlet weak var readingLabel: UILabel!
-    
-    @IBOutlet weak var statusText: UITextView!
+
     
     override func viewDidLoad() {
         super.viewDidLoad()

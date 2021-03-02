@@ -42,19 +42,30 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits" autocapitalizationType="sentences"/>
                             </textView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="C2u-3O-wYO">
+                                <rect key="frame" x="334" y="832" width="30" height="30"/>
+                                <state key="normal" title="Flip"/>
+                                <connections>
+                                    <action selector="Flip:" destination="BYZ-38-t0r" eventType="touchUpInside" id="bX7-Q0-Msa"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="DnI-iK-53j" firstAttribute="top" secondItem="GPK-qq-e8h" secondAttribute="bottom" constant="39" id="7EO-GV-SyD"/>
                             <constraint firstItem="DnI-iK-53j" firstAttribute="bottom" secondItem="6Tk-OE-BBY" secondAttribute="bottom" id="8DX-82-2r5"/>
+                            <constraint firstItem="C2u-3O-wYO" firstAttribute="top" secondItem="ae7-62-3Dt" secondAttribute="bottom" constant="108" id="I67-XH-9K8"/>
                             <constraint firstItem="ae7-62-3Dt" firstAttribute="top" secondItem="syI-Z4-imd" secondAttribute="bottom" constant="8" symbolic="YES" id="POb-5R-Q2c"/>
                             <constraint firstItem="DnI-iK-53j" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="QcG-H0-HA5"/>
                             <constraint firstItem="ae7-62-3Dt" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="U5h-zS-1Wb"/>
                             <constraint firstItem="GPK-qq-e8h" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="buI-mb-Iqx"/>
+                            <constraint firstItem="C2u-3O-wYO" firstAttribute="bottom" secondItem="6Tk-OE-BBY" secondAttribute="bottom" id="dXO-z6-taI"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="C2u-3O-wYO" secondAttribute="trailing" constant="50" id="g7Z-0E-BEf"/>
                             <constraint firstItem="GPK-qq-e8h" firstAttribute="top" secondItem="ae7-62-3Dt" secondAttribute="bottom" constant="48" id="gwB-UE-UxH"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="syI-Z4-imd" secondAttribute="trailing" constant="20" id="hrR-Ic-4Rp"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="ae7-62-3Dt" secondAttribute="trailing" constant="20" id="ieM-dc-tUG"/>
+                            <constraint firstItem="C2u-3O-wYO" firstAttribute="leading" secondItem="DnI-iK-53j" secondAttribute="trailing" constant="110" id="jQV-A4-fM0"/>
                             <constraint firstItem="syI-Z4-imd" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="20" id="wrk-QA-Hc9"/>
                             <constraint firstItem="syI-Z4-imd" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="zfT-z7-sIP"/>
                         </constraints>
