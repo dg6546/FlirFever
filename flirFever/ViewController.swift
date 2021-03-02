@@ -66,7 +66,38 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
             flip = 0
         }
     }
+    
+    
+    
     func imageReceived() {
+        DispatchQueue.main.async{
+            self.statusText.text.append("Image received\n")
+            self.camera.withImage { (image: FLIRThermalImage) in
+                let showImage:UIImage!
+                let sourceImage:UIImage! = image.getImage()
+                let fusion:FLIRFusion! = image.getFusion()
+                    fusion.setFusionMode(VISUAL_MODE)
+                if self.flip == 1{
+                    let flippedImage:UIImage! = UIImage(cgImage: sourceImage.cgImage!,scale:sourceImage.scale,
+                        orientation: UIImage.Orientation.upMirrored)
+                    showImage = flippedImage
+                }else{
+                    showImage = image.getImage()
+                }
+                self.cameraView.image = showImage
+                if image.measurements.measurementSpots.count == 0{
+                    image.measurements.addSpot(CGPoint(x: Int(image.getWidth())/2, y: Int(image.getHeight())/2))
+                }
+                let spot = image.measurements.measurementSpots.firstObject as? FLIRMeasurementSpot
+                //self.readingLabel.text = spot?.value.value() as? String
+                //print(spot?.value.value ?? "nil")
+                self.readingLabel.text = "\(String(format: "%.1f", (spot?.value.value)!-273.15+2 ))"
+            }
+        }
+    }
+    
+    
+/*    func imageReceived() {
         DispatchQueue.global(qos: .default).async(execute: { [self] in
             do{
                 self.camera.withImage({ (image:FLIRThermalImage!) in
@@ -93,7 +124,7 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
         })
             
     }
-
+*/
     
 
     
