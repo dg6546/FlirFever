@@ -25,16 +25,14 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
                 }catch{
                     fatalError("Unable to connect camera")
                 }
-                        DispatchQueue.main.async(execute: { [self] in
-                            discovery.stop()
-                            do{
-                                try camera.subscribeStream()
-                            }catch{
-                                fatalError("Unable to subscribe to stream")
-                            }
-                            
-                        })
-                    
+                DispatchQueue.main.async(execute: { [self] in
+                    discovery.stop()
+                        do{
+                            try camera.subscribeStream()
+                        }catch{
+                            fatalError("Unable to subscribe to stream")
+                        }
+                    })
                 })
 //            do{
 //                try camera.connect(cameraIdentity)
@@ -108,7 +106,7 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
 
     
     @IBAction func startButtonPressed(_ sender: Any) {
-    discovery.start(FLIRCommunicationInterface.lightning)
+        discovery.start(FLIRCommunicationInterface.lightning)
         statusText.text.append("Start camera discovery\n")
         //discovery.start(FLIRCommunicationInterface.emulator)
     }
