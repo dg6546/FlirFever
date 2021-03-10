@@ -78,7 +78,7 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
         DispatchQueue.main.async{
 //            self.cameraView.subviews.forEach { layer in
 //                layer.removeFromSuperview()
-            }
+//            }
             self.camera.withImage { (image: FLIRThermalImage) in
                 let showImage:UIImage!
                 let sourceImage:UIImage! = image.getImage()
