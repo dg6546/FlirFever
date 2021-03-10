@@ -12,6 +12,7 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
     let camera = FLIRCamera()
     let discovery = FLIRDiscovery()
     var flip:Int = 0
+    var faceLayers: [CAShapeLayer] = []
     
     @IBOutlet weak var cameraView: UIImageView!
     
@@ -93,7 +94,7 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
 //                    showImage = image.getImage()
 //                }
                 showImage = image.getImage()
-                let request = VNDetectFaceRectanglesRequest { [unowned self] request, error in
+                let request = VNDetectFaceLandmarksRequest { [unowned self] request, error in
                     if error != nil {
                         
                     }
@@ -115,16 +116,16 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
                 catch {
                     
                 }
-//                if (bBoxList.count != 0) {
-//                    bBoxList.forEach{bBox in
-//                        let recttemp = image.measurements.addRectangle(bBox)
-//                        let label = UILabel(frame: (CGRect(origin: bBox.origin, size: CGSize(width:50,height:20))))
-//                        let text = Double((recttemp?.max.value)!)
-//                        label.text = String(text-273.15)
-//                        self.cameraView.addSubview(label)
-//                    }
-//
-//                }
+                if (bBoxList.count != 0) {
+                    bBoxList.forEach{bBox in
+                        let recttemp = image.measurements.addRectangle(bBox)
+                        let label = UILabel(frame: (CGRect(origin: bBox.origin, size: CGSize(width:50,height:20))))
+                        /*let text = Double((recttemp?.max.value)!)
+                        label.text = String(text-273.15)
+                        self.cameraView.addSubview(label)*/
+                    }
+
+                }
                                 
                 
                 
@@ -179,6 +180,7 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
                                   height: boundingBox.height * cameraView.bounds.height)
             origin = CGPoint(x: boundingBox.minX * cameraView.bounds.width,
                                      y: (1 - observation.boundingBox.minY) * cameraView.bounds.height - size.height)
+            //let oBox = CGRect(origin: origin, size: size)
             let bBox = getBoundingRectAfterRotation(rect: CGRect(origin: origin, size: size), angle: .pi/2)
             
             
@@ -187,11 +189,76 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
             layer.borderColor = UIColor.red.cgColor
             layer.borderWidth = 2
             
+            
+            self.faceLayers.append(layer)
             cameraView.layer.addSublayer(layer)
-            bBoxList.append(bBox)
+            
+            
+            if let landmarks = observation.landmarks {
+                if let leftEye = landmarks.leftEye {
+                    self.handleLandmark(leftEye, faceBoundingBox: bBox)
+                }
+                if let leftEyebrow = landmarks.leftEyebrow {
+                    self.handleLandmark(leftEyebrow, faceBoundingBox: bBox)
+                }
+                if let rightEye = landmarks.rightEye {
+                    self.handleLandmark(rightEye, faceBoundingBox: bBox)
+                }
+                if let rightEyebrow = landmarks.rightEyebrow {
+                    self.handleLandmark(rightEyebrow, faceBoundingBox: bBox)
+                }
+
+                if let nose = landmarks.nose {
+                    self.handleLandmark(nose, faceBoundingBox: bBox)
+                }
+
+                if let outerLips = landmarks.outerLips {
+                    self.handleLandmark(outerLips, faceBoundingBox: bBox)
+                }
+                if let innerLips = landmarks.innerLips {
+                    self.handleLandmark(innerLips, faceBoundingBox: bBox)
+                }
+            }
+            
+            //bBoxList.append(bBox)
         }
         return bBoxList
     }
+    
+    private func handleLandmark(_ eye: VNFaceLandmarkRegion2D, faceBoundingBox: CGRect) {
+        let landmarkPath = CGMutablePath()
+        let landmarkPathPoints = eye.normalizedPoints
+            .map({ eyePoint in
+                CGPoint(
+                    x: eyePoint.x * faceBoundingBox.width + faceBoundingBox.origin.x,
+                    y: (1 - eyePoint.y) * faceBoundingBox.height + faceBoundingBox.origin.y)
+            })
+        landmarkPath.addLines(between: landmarkPathPoints)
+        landmarkPath.closeSubpath()
+        let landmarkLayer = CAShapeLayer()
+        landmarkLayer.path = landmarkPath
+        landmarkLayer.fillColor = UIColor.clear.cgColor
+        landmarkLayer.strokeColor = UIColor.green.cgColor
+
+        self.faceLayers.append(landmarkLayer)
+        self.cameraView.layer.addSublayer(landmarkLayer)
+    }
+    
+    /*private func handleLandMark(_ eye: VNFaceLandmarkRegion2D, faceBoundingBox: CGRect){
+        let landmarkPath = CGMutablePath()
+        let landmarkPathPoints = eye.normalizedPoints.map({ eyePoint in
+            CGPoint(x: eyePoint.y * faceBoundingBox.height + faceBoundingBox.origin.x, y: eyePoint.x * faceBoundingBox.width + faceBoundingBox.origin.y)
+        })
+        landmarkPath.addLines(between: landmarkPathPoints)
+        landmarkPath.closeSubpath()
+        let landmarkLayer = CAShapeLayer()
+        landmarkLayer.path = landmarkPath
+        landmarkLayer.fillColor = UIColor.clear.cgColor
+        landmarkLayer.strokeColor = UIColor.green.cgColor
+        
+        self.faceLayers.append(landmarkLayer)
+        cameraView.layer.addSublayer(landmarkLayer)
+    }*/
                 
 
     
