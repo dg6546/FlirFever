@@ -115,16 +115,20 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
                 catch {
                     
                 }
-//                if (bBoxList.count != 0) {
-//                    bBoxList.forEach{bBox in
-//                        let recttemp = image.measurements.addRectangle(bBox)
-//                        let label = UILabel(frame: (CGRect(origin: bBox.origin, size: CGSize(width:50,height:20))))
-//                        let text = Double((recttemp?.max.value)!)
-//                        label.text = String(text-273.15)
-//                        self.cameraView.addSubview(label)
-//                    }
-//
-//                }
+                if (bBoxList.count != 0) {
+                    bBoxList.forEach{bBox in
+                        let x = bBox.midX
+                        let y = bBox.midY
+                        let point = CGPoint(x: x,y: y)
+                        
+                        image.measurements.addCircle(point, radius: Int32(Int(y-bBox.minY)))
+                        let label = UILabel(frame: (CGRect(origin: bBox.origin, size: CGSize(width:50,height:20))))
+                        let spot  = image.measurements.measurementCircles.firstObject as? FLIRMeasurementCircle
+                        label.text = "\(String(format: "%.1f", (spot?.max.value)!-273.15+2 ))"
+                        self.cameraView.addSubview(label)
+                    }
+
+                }
                                 
                 
                 
@@ -207,7 +211,7 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
     
     @IBAction func startButtonPressed(_ sender: Any) {
         discovery.start(FLIRCommunicationInterface.lightning)
-        statusText.text.append("Start camera discovery\n")
+
         //discovery.start(FLIRCommunicationInterface.emulator)
     }
     
