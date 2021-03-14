@@ -235,9 +235,9 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
             origin = CGPoint(x: boundingBox.minX * cameraView.bounds.width,
                                      y: (1 - observation.boundingBox.minY) * cameraView.bounds.height - size.height)
             
-            let bBox = CGRect(origin: origin, size: size)
+            //let bBox = CGRect(origin: origin, size: size)
             
-            //let bBox = getBoundingRectAfterRotation(rect: CGRect(origin: origin, size: size), angle: .pi/2)
+            let bBox = getBoundingRectAfterRotation(rect: CGRect(origin: origin, size: size), angle: .pi/2)
             
             
             let layer = CAShapeLayer()
