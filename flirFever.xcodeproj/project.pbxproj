@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		75220A602608AACB007E3D86 /* mask.mlmodel in Sources */ = {isa = PBXBuildFile; fileRef = 75220A5F2608AACB007E3D86 /* mask.mlmodel */; };
 		75699EBB25FD5591006AABD8 /* Toast in Frameworks */ = {isa = PBXBuildFile; productRef = 75699EBA25FD5591006AABD8 /* Toast */; };
 		75ED8B24259BEC41000BA2D7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75ED8B23259BEC41000BA2D7 /* AppDelegate.swift */; };
 		75ED8B26259BEC41000BA2D7 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75ED8B25259BEC41000BA2D7 /* SceneDelegate.swift */; };
@@ -55,6 +56,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		75220A5F2608AACB007E3D86 /* mask.mlmodel */ = {isa = PBXFileReference; lastKnownFileType = file.mlmodel; name = mask.mlmodel; path = ../../../../Downloads/mask.mlmodel; sourceTree = "<group>"; };
 		75ED8B20259BEC41000BA2D7 /* flirFever.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = flirFever.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		75ED8B23259BEC41000BA2D7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		75ED8B25259BEC41000BA2D7 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -128,6 +130,7 @@
 			children = (
 				75ED8B23259BEC41000BA2D7 /* AppDelegate.swift */,
 				75ED8B25259BEC41000BA2D7 /* SceneDelegate.swift */,
+				75220A5F2608AACB007E3D86 /* mask.mlmodel */,
 				75ED8B27259BEC41000BA2D7 /* ViewController.swift */,
 				75ED8B29259BEC41000BA2D7 /* Main.storyboard */,
 				75ED8B2C259BEC46000BA2D7 /* Assets.xcassets */,
@@ -302,6 +305,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				75220A602608AACB007E3D86 /* mask.mlmodel in Sources */,
 				75ED8B28259BEC41000BA2D7 /* ViewController.swift in Sources */,
 				75ED8B24259BEC41000BA2D7 /* AppDelegate.swift in Sources */,
 				75ED8B26259BEC41000BA2D7 /* SceneDelegate.swift in Sources */,
