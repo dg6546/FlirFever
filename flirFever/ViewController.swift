@@ -9,6 +9,19 @@ import UIKit
 import Vision
 import Toast
 
+
+extension UIViewController {
+    func hideKeyboardWhenTappedAround() {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(UIViewController.dismissKeyboard))
+        tap.cancelsTouchesInView = false
+        view.addGestureRecognizer(tap)
+    }
+    
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
+    }
+}
+
 class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataReceivedDelegate, FLIRRemoteDelegate {
     let camera = FLIRCamera()
     let discovery = FLIRDiscovery()
@@ -32,7 +45,10 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
     
     @IBOutlet weak var cameraView: UIImageView!
     
+    @IBOutlet weak var e_text: UITextField!
     
+    @IBOutlet weak var at_text: UITextField!
+    @IBOutlet weak var rh_text: UITextField!
     func cameraFound(_ cameraIdentity: FLIRIdentity) {
         if cameraIdentity.cameraType() == FLIRCameraType.flirOne{
             
@@ -314,6 +330,16 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
         // Do any additional setup after loading the view.
         camera.delegate = self
         discovery.delegate = self
+        
+        self.hideKeyboardWhenTappedAround()
+        e_text.keyboardType = .decimalPad
+        at_text.keyboardType = .decimalPad
+        rh_text.keyboardType = .numberPad
+        e_text.text = "0.75"
+        at_text.text = "25.0"
+        rh_text.text = "50"
+
+        
     }
 
     
@@ -347,8 +373,45 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
         }
     }()
 
-
-
+    @IBAction func e_textChanged(_ sender: UITextField) {
+        var currentValue = Float(sender.text!)
+        if (currentValue! > 1 || currentValue! < 0) {
+            e_text.text = "0.50"
+        }else{
+            e_text.text = String(format: "%.2f", currentValue!)
+        }
+    }
+    
+    @IBAction func at_textChanged(_ sender: UITextField) {
+        var currentValue = Float(sender.text!)
+        if (currentValue! > 40 || currentValue! < -10) {
+            at_text.text = "25.0"
+        }else{
+            at_text.text = String(format: "%.1f", currentValue!)
+        }
+    }
+    
+    @IBAction func rh_textChanged(_ sender: UITextField) {
+        var currentValue = Float(sender.text!)
+        if (currentValue! > 100 || currentValue! < 0) {
+            rh_text.text = "50"
+        }else{
+            rh_text.text = String(format: "%d", currentValue!)
+        }
+    }
+    
+    func getEmissivity() ->Float{
+        var currentValue = Float(e_text.text!)
+        return currentValue!
+    }
+    func getATemp()->Float{
+        var currentValue = Float(at_text.text!)
+        return currentValue!
+    }
+    func getRH()->Int{
+        var currentValue = Int(rh_text.text!)
+        return currentValue!
+    }
     /*
     private func changeChargingLabel(state2 : FLIRChargingState){
         guard let state2 = self.camera.getRemoteControl()?.getBattery()?.getChargingState() else {return}
