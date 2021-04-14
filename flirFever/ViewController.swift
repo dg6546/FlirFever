@@ -34,7 +34,7 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
     var emissivity:Float = 0.95
     var objectDistance:Float = 1
     var atmosphericTemperature:Float = 27
-    var relativeHumidity:Float = 0.59
+    var relativeHumidity:Float = 0.5
 
     
     //var humanList = [Human]()
@@ -97,11 +97,11 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
     }
     
     func chargingStateChanged(_ state: FLIRChargingState) {
-        //trash, does not working
+        //trash, does not work
     }
     
     func percentageChanged(_ percent: Int32) {
-        //trash, does not working
+        //trash, does not work
     }
     
     
@@ -335,9 +335,9 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
         e_text.keyboardType = .decimalPad
         at_text.keyboardType = .decimalPad
         rh_text.keyboardType = .numberPad
-        e_text.text = "0.75"
-        at_text.text = "25.0"
-        rh_text.text = "50"
+        e_text.text = NSString(format: "%.2f", self.objectDistance) as String
+        at_text.text = NSString(format: "%.2f", self.atmosphericTemperature) as String
+        rh_text.text = NSString(format: "%.0f", (self.relativeHumidity)*100) as String
 
         
     }
@@ -376,9 +376,10 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
     @IBAction func e_textChanged(_ sender: UITextField) {
         var currentValue = Float(sender.text!)
         if (currentValue! > 1 || currentValue! < 0) {
-            e_text.text = "0.50"
+            e_text.text = "1.0"
         }else{
             e_text.text = String(format: "%.2f", currentValue!)
+            self.objectDistance = getRange()
         }
     }
     
@@ -388,19 +389,21 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
             at_text.text = "25.0"
         }else{
             at_text.text = String(format: "%.1f", currentValue!)
+            self.atmosphericTemperature = getATemp()
         }
     }
     
     @IBAction func rh_textChanged(_ sender: UITextField) {
         var currentValue = Float(sender.text!)
-        if (currentValue! > 100 || currentValue! < 0) {
+        if (currentValue! >= 100 || currentValue! <= 0) {
             rh_text.text = "50"
         }else{
-            rh_text.text = String(format: "%d", currentValue!)
+            rh_text.text = String(format: "%.0f", currentValue!)
+            self.relativeHumidity = getRH()/100
         }
     }
     
-    func getEmissivity() ->Float{
+    func getRange() ->Float{
         var currentValue = Float(e_text.text!)
         return currentValue!
     }
@@ -408,8 +411,8 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
         var currentValue = Float(at_text.text!)
         return currentValue!
     }
-    func getRH()->Int{
-        var currentValue = Int(rh_text.text!)
+    func getRH()->Float{
+        var currentValue = Float(rh_text.text!)
         return currentValue!
     }
     /*
