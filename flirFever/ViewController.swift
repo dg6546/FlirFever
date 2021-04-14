@@ -45,7 +45,7 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
     
     @IBOutlet weak var cameraView: UIImageView!
     
-    @IBOutlet weak var e_text: UITextField!
+    @IBOutlet weak var objd_text: UITextField!
     
     @IBOutlet weak var at_text: UITextField!
     @IBOutlet weak var rh_text: UITextField!
@@ -332,10 +332,10 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
         discovery.delegate = self
         
         self.hideKeyboardWhenTappedAround()
-        e_text.keyboardType = .decimalPad
+        objd_text.keyboardType = .decimalPad
         at_text.keyboardType = .decimalPad
         rh_text.keyboardType = .numberPad
-        e_text.text = "0.75"
+        objd_text.text = "0.75"
         at_text.text = "25.0"
         rh_text.text = "50"
 
@@ -373,12 +373,12 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
         }
     }()
 
-    @IBAction func e_textChanged(_ sender: UITextField) {
+    @IBAction func objd_textChanged(_ sender: UITextField) {
         var currentValue = Float(sender.text!)
-        if (currentValue! > 1 || currentValue! < 0) {
-            e_text.text = "0.50"
+        if (currentValue! <= 0) {
+            objd_text.text = "1.00"
         }else{
-            e_text.text = String(format: "%.2f", currentValue!)
+            objd_text.text = String(format: "%.2f", currentValue!)
         }
     }
     
@@ -396,20 +396,20 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
         if (currentValue! > 100 || currentValue! < 0) {
             rh_text.text = "50"
         }else{
-            rh_text.text = String(format: "%d", currentValue!)
+            rh_text.text = String(format: "%.f", currentValue!)
         }
     }
     
-    func getEmissivity() ->Float{
-        var currentValue = Float(e_text.text!)
+    func getobjd() ->Float{
+        var currentValue = Float(objd_text.text!)
         return currentValue!
     }
     func getATemp()->Float{
         var currentValue = Float(at_text.text!)
         return currentValue!
     }
-    func getRH()->Int{
-        var currentValue = Int(rh_text.text!)
+    func getRH()->Float{
+        var currentValue = Float(rh_text.text!)
         return currentValue!
     }
     /*
