@@ -9,7 +9,12 @@ import UIKit
 import Vision
 import Toast
 import AVFoundation
+import CoreBluetooth
 
+let envServiceCBUUID = CBUUID(string: "0xFFE0")
+let envCharacteristicCBUUID = CBUUID(string: "0xFFE1")
+
+// MARK: keyboard extension
 extension UIViewController {
     func hideKeyboardWhenTappedAround() {
         let tap = UITapGestureRecognizer(target: self, action: #selector(UIViewController.dismissKeyboard))
@@ -22,6 +27,101 @@ extension UIViewController {
     }
 }
 
+// MARK: bluetooth extension delegate
+extension ViewController: CBCentralManagerDelegate {
+    public func centralManagerDidUpdateState(_ central: CBCentralManager) {
+        switch central.state {
+            case .unknown:
+                print("central.state is .unknown")
+            case .resetting:
+                print("central.state is .resetting")
+            case .unsupported:
+                print("central.state is .unsupported")
+            case .unauthorized:
+                print("central.state is .unauthorized")
+            case .poweredOff:
+                print("central.state is .poweredOff")
+            case .poweredOn:
+                print("central.state is .poweredOn")
+                centralManager.scanForPeripherals(withServices: [envServiceCBUUID])
+            @unknown default:
+                print("unknown")
+        }
+    }
+    func centralManager(_ central: CBCentralManager, didDiscover peripheral: CBPeripheral, advertisementData: [String : Any], rssi RSSI: NSNumber) {
+        envPeripheral = peripheral
+        envPeripheral.delegate = self
+        print(envPeripheral!)
+        centralManager.stopScan()
+        centralManager.connect(envPeripheral)
+    }
+    func centralManager(_ central: CBCentralManager, didConnect peripheral: CBPeripheral) {
+        print("Connected!")
+        envPeripheral.discoverServices([envServiceCBUUID])
+    }
+    func centralManager(_ central: CBCentralManager, didDisconnectPeripheral peripheral: CBPeripheral, error: Error?) {
+        updateBluetoothLabel(connected: false)
+    }
+}
+
+extension ViewController: CBPeripheralDelegate {
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
+        guard let services = peripheral.services else { return }
+        for service in services {
+            peripheral.discoverCharacteristics(nil, for: service)
+
+        }
+    }
+    
+    func peripheral(_ peripheral: CBPeripheral, didDiscoverCharacteristicsFor service: CBService, error: Error?) {
+        guard let characteristics = service.characteristics else { return }
+
+        for characteristic in characteristics {
+            print(self.envPeripheral?.readValue(for: characteristic) ?? 0)
+          print(characteristic)
+            updateBluetoothLabel(connected: true)
+            if characteristic.properties.contains(.read) {
+                print("\(characteristic.uuid): properties contains .read")
+                peripheral.readValue(for: characteristic)
+            }
+            if characteristic.properties.contains(.notify) {
+                print("\(characteristic.uuid): properties contains .notify")
+                peripheral.setNotifyValue(true, for: characteristic)
+            }
+        }
+    }
+    
+    func peripheral(_ peripheral: CBPeripheral, didUpdateValueFor characteristic: CBCharacteristic, error: Error?) {
+        switch characteristic.uuid {
+            case envCharacteristicCBUUID:
+                let data = envData(from: characteristic)
+                let envArr = data.components(separatedBy: ",")
+                if envArr.count > 1{
+                    print(envArr[0])
+                    print(envArr[1])
+                    print(envArr[2].trimmingCharacters(in: .whitespacesAndNewlines))
+                    self.objectDistance = Float(envArr[0])!
+                    self.atmosphericTemperature = Float(envArr[1])!
+                    self.relativeHumidity = Float(envArr[2])! / 100
+                    updateThreeEnvLabel()
+                }else{
+                    print("Receiving Data")
+                }
+                
+            default:
+                print("Unhandled Characteristic UUID: \(characteristic.uuid)")
+        }
+    }
+    
+    private func envData(from characteristic: CBCharacteristic) -> String {
+        guard let characteristicData = characteristic.value else { return "" }
+        let byteArray:String = String(decoding: characteristicData, as: UTF8.self)
+        return byteArray
+    }
+}
+
+
+// MARK: class start
 class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataReceivedDelegate, FLIRRemoteDelegate {
     let camera = FLIRCamera()
     let discovery = FLIRDiscovery()
@@ -42,18 +142,52 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
     var photo = UIImage()
     var isShowingResult = false
     var mode = 0
+    var player:AVAudioPlayer?
+    var centralManager: CBCentralManager!
+    var envPeripheral: CBPeripheral!
     //var humanList = [Human]()
     
+    @IBOutlet weak var bluetoothLabel: UILabel!
     @IBOutlet weak var chargingLabel: UILabel!
     
     @IBOutlet weak var batteryLabel: UILabel!
     
     @IBOutlet weak var cameraView: UIImageView!
     
-    @IBOutlet weak var objd_text: UITextField!
     
+    @IBOutlet weak var objd_text: UITextField!
     @IBOutlet weak var at_text: UITextField!
     @IBOutlet weak var rh_text: UITextField!
+    
+    // MARK: UI delegate
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "goToResult"{
+            let resultVC = segue.destination as! ResultViewController
+            resultVC.dismiss(animated: false, completion: nil)
+            resultVC.type = self.type
+            resultVC.temp = self.reading
+            resultVC.image = self.photo
+            resultVC.color = self.color
+            resultVC.mainController = self
+        }
+    }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        centralManager = CBCentralManager(delegate: self, queue: nil)
+        definesPresentationContext = true
+        // Do any additional setup after loading the view.
+        camera.delegate = self
+        discovery.delegate = self
+        
+        self.hideKeyboardWhenTappedAround()
+        objd_text.keyboardType = .decimalPad
+        at_text.keyboardType = .decimalPad
+        rh_text.keyboardType = .numberPad
+        updateThreeEnvLabel()
+    }
+    
+    // MARK: camera delegate
     func cameraFound(_ cameraIdentity: FLIRIdentity) {
         if cameraIdentity.cameraType() == FLIRCameraType.flirOne{
             
@@ -128,7 +262,29 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
         self.view.makeToast("Camera disconnected", duration: 3.0, position: .bottom)
     }
     
-
+    private func getBattery(){
+        DispatchQueue.main.async {
+            Timer.scheduledTimer(withTimeInterval: 10.0, repeats: true) { timer in
+                let percent = self.battery.getPercentage()
+                self.batteryLabel.text = "\(String(percent))"
+                let charging = self.battery.getChargingState()
+                if charging == FLIRChargingState.MANAGEDCHARGING{
+                    self.chargingLabel.isHidden = false
+                }else{
+                    self.chargingLabel.isHidden = true
+                }
+            }
+        }
+    }
+    
+    @objc private func calibrate(){
+            if camera.isConnected(){
+                camera.getRemoteControl()?.getCalibration()?.performNUC()
+                
+            }
+    }
+    
+    // MARK: IBAction
     @IBAction func flipCamera(_ sender: Any) {
         if (flip==0){
             cameraView.transform = CGAffineTransform(scaleX: -1, y: 1)
@@ -138,9 +294,59 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
             cameraView.transform = CGAffineTransform(scaleX: 1, y: 1)
         }
     }
+    @IBAction func startButtonPressed(_ sender: Any) {
+        discovery.start(FLIRCommunicationInterface.lightning)
+
+        //discovery.start(FLIRCommunicationInterface.emulator)
+    }
+    
+    @IBAction func calibrateButtonPressed(_ sender: Any) {
+        calibrate()
+    }
+    
+    @IBAction func objd_textChanged(_ sender: UITextField) {
+        let currentValue = Float(sender.text!)
+        if (currentValue! > 1 || currentValue! < 0) {
+            objd_text.text = "1.0"
+        }else{
+            objd_text.text = String(format: "%.2f", currentValue!)
+            self.objectDistance = getRange()
+        }
+    }
     
     
+    @IBAction func at_textChanged(_ sender: UITextField) {
+        let currentValue = Float(sender.text!)
+        if (currentValue! > 40 || currentValue! < -10) {
+            at_text.text = "25.0"
+        }else{
+            at_text.text = String(format: "%.1f", currentValue!)
+            self.atmosphericTemperature = getATemp()
+        }
+    }
     
+    @IBAction func rh_textChanged(_ sender: UITextField) {
+        let currentValue = Float(sender.text!)
+        if (currentValue! >= 100 || currentValue! <= 0) {
+            rh_text.text = "50"
+        }else{
+            rh_text.text = String(format: "%.0f", currentValue!)
+            self.relativeHumidity = getRH()/100
+        }
+    }
+    
+    @IBAction func modeSwitch(_ sender: Any) {
+        if mode == 0{
+            mode = 1
+        }else{
+            mode = 0
+        }
+    }
+    
+    // MARK: AI related
+    
+    //this one is actually camera's delegate but it includes VNImageRequestHandler
+    //so it is better here
     func imageReceived() {
         DispatchQueue.main.async{
             self.cameraView.layer.sublayers?.forEach { layer in
@@ -180,10 +386,6 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
         }
     }
     
-    func rectInsideRect(smallRect: CGRect, bigRect: CGRect) -> Bool {
-        return (smallRect.minX >= bigRect.minX && smallRect.minY >= bigRect.minY
-                    && smallRect.maxX <= bigRect.maxX && smallRect.maxY <= bigRect.maxY)
-    }
     
     //called after finish detection request
     func processDetection(for request: VNRequest, error: Error?){
@@ -195,7 +397,7 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
                 //get class label
                 let label: String? = observation.labels.first?.identifier
                 if (label == "with_mask" || label == "without_mask" || label == "mask_weared_incorrect"){
-                    if observation.confidence > 0.3{ //50% confidence threshold
+                    if observation.confidence > 0.5{ //50% confidence threshold
                         //add a new face box
                         let newFaceBox = FaceBox(box: observation.boundingBox, label: label!)
                         faceBoxList.append(newFaceBox)
@@ -297,6 +499,7 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
                 foreheadFrameCounted = 0
             }
             else if reading > 37.5{
+                playSound(type: "alarm")
                 color = UIColor.red
                 foreheadFrameCounted += 1
             }else if label == "without_mask" || label == "mask_weared_incorrect"{
@@ -308,6 +511,7 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
             }
             self.color = color
             
+            //count if received 5 consective image with forehead shown
             if foreheadFrameCounted >= 5 && !isShowingResult && mode == 1
             {
                 isShowingResult = true
@@ -358,53 +562,7 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
 
      }
     
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "goToResult"{
-            let resultVC = segue.destination as! ResultViewController
-            resultVC.dismiss(animated: false, completion: nil)
-            resultVC.type = self.type
-            resultVC.temp = self.reading
-            resultVC.image = self.photo
-            resultVC.color = self.color
-            resultVC.mainController = self
-        }
-    }
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        definesPresentationContext = true
-        // Do any additional setup after loading the view.
-        camera.delegate = self
-        discovery.delegate = self
-        
-        self.hideKeyboardWhenTappedAround()
-        objd_text.keyboardType = .decimalPad
-        at_text.keyboardType = .decimalPad
-        rh_text.keyboardType = .numberPad
-        objd_text.text = NSString(format: "%.2f", self.objectDistance) as String
-        at_text.text = NSString(format: "%.2f", self.atmosphericTemperature) as String
-        rh_text.text = NSString(format: "%.0f", (self.relativeHumidity)*100) as String
 
-        
-    }
-
-    
-    @IBAction func startButtonPressed(_ sender: Any) {
-        discovery.start(FLIRCommunicationInterface.lightning)
-
-        //discovery.start(FLIRCommunicationInterface.emulator)
-    }
-    
-    @IBAction func calibrateButtonPressed(_ sender: Any) {
-        calibrate()
-    }
-    
-    @objc private func calibrate(){
-            if camera.isConnected(){
-                camera.getRemoteControl()?.getCalibration()?.performNUC()
-                
-            }
-    }
     
     lazy var detectionRequest: VNCoreMLRequest = {
         do{
@@ -418,37 +576,24 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
             fatalError("Cannot create model")
         }
     }()
+    // MARK: Update UI method
+    func updateThreeEnvLabel(){
+        objd_text.text = NSString(format: "%.2f", self.objectDistance) as String
+        at_text.text = NSString(format: "%.2f", self.atmosphericTemperature) as String
+        rh_text.text = NSString(format: "%.0f", (self.relativeHumidity)*100) as String
+    }
     
-    @IBAction func e_textChanged(_ sender: UITextField) {
-        let currentValue = Float(sender.text!)
-        if (currentValue! > 1 || currentValue! < 0) {
-            objd_text.text = "1.0"
+    func updateBluetoothLabel(connected:Bool){
+        if connected{
+            bluetoothLabel.text = "Bluetooth\nConnected"
+            bluetoothLabel.textColor = UIColor.green
         }else{
-            objd_text.text = String(format: "%.2f", currentValue!)
-            self.objectDistance = getRange()
+            bluetoothLabel.text = "Bluetooth\nDisconnected"
+            bluetoothLabel.textColor = UIColor.red
         }
     }
     
-    @IBAction func at_textChanged(_ sender: UITextField) {
-        let currentValue = Float(sender.text!)
-        if (currentValue! > 40 || currentValue! < -10) {
-            at_text.text = "25.0"
-        }else{
-            at_text.text = String(format: "%.1f", currentValue!)
-            self.atmosphericTemperature = getATemp()
-        }
-    }
-    
-    @IBAction func rh_textChanged(_ sender: UITextField) {
-        let currentValue = Float(sender.text!)
-        if (currentValue! >= 100 || currentValue! <= 0) {
-            rh_text.text = "50"
-        }else{
-            rh_text.text = String(format: "%.0f", currentValue!)
-            self.relativeHumidity = getRH()/100
-        }
-    }
-    
+    // MARK:other functions
     func getRange() ->Float{
         let currentValue = Float(objd_text.text!)
         return currentValue!
@@ -461,43 +606,33 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
         let currentValue = Float(rh_text.text!)
         return currentValue!
     }
-    /*
-    private func changeChargingLabel(state2 : FLIRChargingState){
-        guard let state2 = self.camera.getRemoteControl()?.getBattery()?.getChargingState() else {return}
-        if (state2 == FLIRChargingState(rawValue: 1)){
-            chargingLabel.text = "Not charging"
-        }else if (state2 == FLIRChargingState(rawValue: 2)){
-            chargingLabel.text = "Charging"
-        }
-    }*/
     
-    private func getBattery(){
-        DispatchQueue.main.async {
-            Timer.scheduledTimer(withTimeInterval: 10.0, repeats: true) { timer in
-                let percent = self.battery.getPercentage()
-                self.batteryLabel.text = "\(String(percent))"
-                let charging = self.battery.getChargingState()
-                if charging == FLIRChargingState.MANAGEDCHARGING{
-                    self.chargingLabel.text = "Charging"
-                }else{
-                    self.chargingLabel.text = "Not Charging"
-                }
-            }
+    
+    func rectInsideRect(smallRect: CGRect, bigRect: CGRect) -> Bool {
+        return (smallRect.minX >= bigRect.minX && smallRect.minY >= bigRect.minY
+                    && smallRect.maxX <= bigRect.maxX && smallRect.maxY <= bigRect.maxY)
+    }
+    
+    func playSound(type:String){
+        guard let url = Bundle.main.url(forResource: type, withExtension: "wav") else {return}
+        
+        do{
+            try AVAudioSession.sharedInstance().setCategory(.playback,mode: .default)
+            try AVAudioSession.sharedInstance().setActive(true)
+            player = try AVAudioPlayer(contentsOf: url, fileTypeHint: AVFileType.wav.rawValue)
+            guard let player = player else {return}
+            
+            player.play()
+        } catch let error{
+            print(error.localizedDescription)
         }
     }
     
-    @IBAction func modeSwitch(_ sender: Any) {
-        if mode == 0{
-            mode = 1
-        }else{
-            mode = 0
-        }
-    }
-    
-    
+
     
 }
 
+//MARK: FaceBox class
 class FaceBox{
     private var box = CGRect()
     private var label = String()

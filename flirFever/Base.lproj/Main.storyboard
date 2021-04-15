@@ -44,10 +44,10 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Not charging" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3pt-R6-R4r">
-                                <rect key="frame" x="158" y="45" width="99" height="21"/>
+                            <label hidden="YES" opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="charging" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="3pt-R6-R4r">
+                                <rect key="frame" x="275" y="74" width="99" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                <nil key="textColor"/>
+                                <color key="textColor" systemColor="systemGreenColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="tKL-9T-PhR">
@@ -58,7 +58,7 @@
                                 <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                 <textInputTraits key="textInputTraits"/>
                                 <connections>
-                                    <action selector="e_textChanged:" destination="BYZ-38-t0r" eventType="editingDidEnd" id="QJk-cI-uEW"/>
+                                    <action selector="objd_textChanged:" destination="BYZ-38-t0r" eventType="editingDidEnd" id="ymn-w6-5Ez"/>
                                 </connections>
                             </textField>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="7du-4c-Xxk">
@@ -96,8 +96,8 @@
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                             </label>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="RH" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gQu-Lu-4Wh">
-                                <rect key="frame" x="305" y="115.66666666666667" width="23" height="21.000000000000014"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" ambiguous="YES" text="RH" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gQu-Lu-4Wh">
+                                <rect key="frame" x="305" y="115.66666666666669" width="23" height="21"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
@@ -127,7 +127,7 @@
                                 <nil key="highlightedColor"/>
                             </label>
                             <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="RI9-JJ-RlX">
-                                <rect key="frame" x="16" y="45" width="137" height="32"/>
+                                <rect key="frame" x="16" y="45" width="127" height="32"/>
                                 <segments>
                                     <segment title="Normal"/>
                                     <segment title="Photo"/>
@@ -146,6 +146,15 @@
                                     <action selector="flipCamera:" destination="BYZ-38-t0r" eventType="valueChanged" id="SzX-Ih-q5C"/>
                                 </connections>
                             </segmentedControl>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="scaleToFill" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" textAlignment="center" lineBreakMode="wordWrap" numberOfLines="2" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zlQ-27-in0">
+                                <rect key="frame" x="148" y="42" width="109" height="47"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <string key="text">Bluetooth
+disconnected</string>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <color key="textColor" systemColor="systemRedColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -154,8 +163,8 @@
                             <constraint firstItem="Jbj-hs-WXe" firstAttribute="top" secondItem="nrw-K2-fUt" secondAttribute="bottom" constant="-27" id="1eP-fd-kaH"/>
                             <constraint firstItem="Q9P-8h-XML" firstAttribute="bottom" secondItem="6Tk-OE-BBY" secondAttribute="bottom" id="3Aa-NZ-Kts"/>
                             <constraint firstItem="O8g-QE-nKe" firstAttribute="top" secondItem="RI9-JJ-RlX" secondAttribute="bottom" constant="37" id="3nY-p3-gYX"/>
-                            <constraint firstItem="3pt-R6-R4r" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="1" id="4BG-pL-Uud"/>
                             <constraint firstItem="lIt-IA-hod" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="102" id="5Ni-ZF-nbB"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="3pt-R6-R4r" secondAttribute="trailing" constant="16" id="83z-yP-r1J"/>
                             <constraint firstItem="DnI-iK-53j" firstAttribute="bottom" secondItem="6Tk-OE-BBY" secondAttribute="bottom" id="8DX-82-2r5"/>
                             <constraint firstItem="Fpq-C9-P77" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="tKL-9T-PhR" secondAttribute="trailing" constant="8" symbolic="YES" id="A9j-st-oGd"/>
                             <constraint firstItem="Fpq-C9-P77" firstAttribute="trailing" secondItem="7du-4c-Xxk" secondAttribute="trailing" id="AAa-sL-6cP"/>
@@ -165,19 +174,18 @@
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="vyu-sp-vN5" secondAttribute="trailing" constant="36" id="CJt-1b-Pql"/>
                             <constraint firstItem="nrw-K2-fUt" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="7du-4c-Xxk" secondAttribute="trailing" constant="8" symbolic="YES" id="DnL-sU-mNM"/>
                             <constraint firstItem="Fpq-C9-P77" firstAttribute="top" secondItem="7du-4c-Xxk" secondAttribute="bottom" constant="-27" id="E4F-ip-nAT"/>
-                            <constraint firstItem="3pt-R6-R4r" firstAttribute="leading" secondItem="RI9-JJ-RlX" secondAttribute="trailing" constant="5" id="FFT-hX-Q2H"/>
+                            <constraint firstItem="gQu-Lu-4Wh" firstAttribute="top" secondItem="3pt-R6-R4r" secondAttribute="bottom" constant="20.670000000000002" id="H5W-Iu-TMg"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="foQ-Ju-WaT" secondAttribute="trailing" constant="20" id="Irb-ae-PZa"/>
                             <constraint firstItem="nrw-K2-fUt" firstAttribute="centerY" secondItem="Jbj-hs-WXe" secondAttribute="centerY" id="LpX-6Q-FAG"/>
                             <constraint firstItem="ae7-62-3Dt" firstAttribute="top" secondItem="lIt-IA-hod" secondAttribute="bottom" constant="27.5" id="O0U-hb-GvY"/>
-                            <constraint firstItem="3pt-R6-R4r" firstAttribute="leading" secondItem="RI9-JJ-RlX" secondAttribute="trailing" constant="5" id="ONF-g8-vwQ"/>
                             <constraint firstItem="7du-4c-Xxk" firstAttribute="top" secondItem="yFa-Jn-utD" secondAttribute="bottom" constant="8" symbolic="YES" id="Oxu-cG-hdI"/>
                             <constraint firstItem="yFa-Jn-utD" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="O8g-QE-nKe" secondAttribute="trailing" constant="8" symbolic="YES" id="P9L-2K-8ZE"/>
                             <constraint firstItem="nrw-K2-fUt" firstAttribute="baseline" secondItem="Fpq-C9-P77" secondAttribute="baseline" id="Pdp-ce-V01"/>
                             <constraint firstItem="RI9-JJ-RlX" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="16" id="QNO-WT-AQU"/>
                             <constraint firstItem="DnI-iK-53j" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="QcG-H0-HA5"/>
                             <constraint firstItem="RI9-JJ-RlX" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="1" id="TI5-qZ-G4J"/>
-                            <constraint firstItem="BeW-4r-VNC" firstAttribute="leading" secondItem="3pt-R6-R4r" secondAttribute="trailing" constant="22" id="URt-N6-peF"/>
                             <constraint firstItem="Jbj-hs-WXe" firstAttribute="top" secondItem="gQu-Lu-4Wh" secondAttribute="bottom" constant="8" symbolic="YES" id="UzQ-QL-jRp"/>
+                            <constraint firstItem="3pt-R6-R4r" firstAttribute="top" secondItem="foQ-Ju-WaT" secondAttribute="bottom" constant="8" symbolic="YES" id="VGx-lm-LNG"/>
                             <constraint firstItem="O8g-QE-nKe" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="45" id="Y8l-wN-o4k"/>
                             <constraint firstItem="yFa-Jn-utD" firstAttribute="centerX" secondItem="7du-4c-Xxk" secondAttribute="centerX" id="Yqi-cU-PAb"/>
                             <constraint firstItem="tKL-9T-PhR" firstAttribute="top" secondItem="O8g-QE-nKe" secondAttribute="bottom" constant="8" symbolic="YES" id="aHP-k4-3Vc"/>
@@ -185,11 +193,11 @@
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="ae7-62-3Dt" secondAttribute="bottom" constant="73" id="f5O-60-Mf6"/>
                             <constraint firstItem="ae7-62-3Dt" firstAttribute="top" secondItem="BeW-4r-VNC" secondAttribute="bottom" constant="131" id="fIH-Dz-KKG"/>
                             <constraint firstItem="DnI-iK-53j" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="Q9P-8h-XML" secondAttribute="trailing" constant="30" id="fcz-NQ-5c8"/>
-                            <constraint firstItem="yFa-Jn-utD" firstAttribute="top" secondItem="3pt-R6-R4r" secondAttribute="bottom" constant="47" id="iKE-rf-NaB"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="Jbj-hs-WXe" secondAttribute="trailing" constant="35.5" id="iUB-Ob-N2N"/>
                             <constraint firstItem="ae7-62-3Dt" firstAttribute="top" relation="greaterThanOrEqual" secondItem="6Tk-OE-BBY" secondAttribute="top" constant="30" id="iVy-U7-8vH"/>
                             <constraint firstItem="BeW-4r-VNC" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" constant="43" id="iaF-04-r7M"/>
                             <constraint firstItem="tKL-9T-PhR" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="36" id="ndC-tH-vMp"/>
+                            <constraint firstItem="3pt-R6-R4r" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" constant="275" id="onw-ul-Ow6"/>
                             <constraint firstItem="vyu-sp-vN5" firstAttribute="top" secondItem="ae7-62-3Dt" secondAttribute="bottom" constant="42" id="oqL-Gs-i4g"/>
                             <constraint firstItem="ae7-62-3Dt" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="pst-3h-sN7"/>
                             <constraint firstItem="foQ-Ju-WaT" firstAttribute="leading" secondItem="BeW-4r-VNC" secondAttribute="trailing" constant="8" symbolic="YES" id="rn4-so-ESB"/>
@@ -210,9 +218,10 @@
                     <connections>
                         <outlet property="at_text" destination="7du-4c-Xxk" id="iGG-oP-JBQ"/>
                         <outlet property="batteryLabel" destination="foQ-Ju-WaT" id="Ygw-0s-gQg"/>
+                        <outlet property="bluetoothLabel" destination="zlQ-27-in0" id="iyT-Y0-o2K"/>
                         <outlet property="cameraView" destination="ae7-62-3Dt" id="YuI-AZ-5Vl"/>
                         <outlet property="chargingLabel" destination="3pt-R6-R4r" id="fup-QA-GN2"/>
-                        <outlet property="e_text" destination="tKL-9T-PhR" id="IYh-0e-JZM"/>
+                        <outlet property="objd_text" destination="tKL-9T-PhR" id="amH-M0-qSb"/>
                         <outlet property="rh_text" destination="Jbj-hs-WXe" id="raK-mx-MDR"/>
                         <segue destination="o49-XV-6aK" kind="presentation" identifier="goToResult" id="x6C-go-ypz"/>
                     </connections>
@@ -295,6 +304,12 @@
     <resources>
         <systemColor name="systemBackgroundColor">
             <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemGreenColor">
+            <color red="0.20392156862745098" green="0.7803921568627451" blue="0.34901960784313724" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
+        <systemColor name="systemRedColor">
+            <color red="1" green="0.23137254901960785" blue="0.18823529411764706" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
     </resources>
 </document>
