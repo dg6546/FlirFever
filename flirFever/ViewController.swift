@@ -8,7 +8,7 @@
 import UIKit
 import Vision
 import Toast
-
+import AVFoundation
 
 extension UIViewController {
     func hideKeyboardWhenTappedAround() {
@@ -42,7 +42,6 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
     var photo = UIImage()
     var isShowingResult = false
     var mode = 0
-    
     //var humanList = [Human]()
     
     @IBOutlet weak var chargingLabel: UILabel!
@@ -382,7 +381,7 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
         objd_text.keyboardType = .decimalPad
         at_text.keyboardType = .decimalPad
         rh_text.keyboardType = .numberPad
-        e_text.text = NSString(format: "%.2f", self.objectDistance) as String
+        objd_text.text = NSString(format: "%.2f", self.objectDistance) as String
         at_text.text = NSString(format: "%.2f", self.atmosphericTemperature) as String
         rh_text.text = NSString(format: "%.0f", (self.relativeHumidity)*100) as String
 
@@ -423,9 +422,9 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
     @IBAction func e_textChanged(_ sender: UITextField) {
         let currentValue = Float(sender.text!)
         if (currentValue! > 1 || currentValue! < 0) {
-            e_text.text = "1.0"
+            objd_text.text = "1.0"
         }else{
-            e_text.text = String(format: "%.2f", currentValue!)
+            objd_text.text = String(format: "%.2f", currentValue!)
             self.objectDistance = getRange()
         }
     }
@@ -451,7 +450,7 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
     }
     
     func getRange() ->Float{
-        let currentValue = Float(e_text.text!)
+        let currentValue = Float(objd_text.text!)
         return currentValue!
     }
     func getATemp()->Float{
@@ -494,6 +493,8 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
             mode = 0
         }
     }
+    
+    
     
 }
 
