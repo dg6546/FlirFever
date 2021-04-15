@@ -35,7 +35,13 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
     var objectDistance:Float = 1
     var atmosphericTemperature:Float = 27
     var relativeHumidity:Float = 0.5
-
+    var foreheadFrameCounted = 0
+    var type = ""
+    var reading = 0.0
+    var color = UIColor.green
+    var photo = UIImage()
+    var isShowingResult = false
+    var mode = 0
     
     //var humanList = [Human]()
     
@@ -82,7 +88,7 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
                         }
                     })
                 })
-            calibrate()
+            //calibrate()
             self.view.makeToast("Camera connected", duration: 3.0, position: .bottom)
             if discovery.isDiscovering(){
                 discovery.stop()
@@ -123,12 +129,14 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
         self.view.makeToast("Camera disconnected", duration: 3.0, position: .bottom)
     }
     
-    @IBAction func Flip(_ sender: Any) {
-        
+
+    @IBAction func flipCamera(_ sender: Any) {
         if (flip==0){
+            cameraView.transform = CGAffineTransform(scaleX: -1, y: 1)
             flip = 1
         }else{
             flip = 0
+            cameraView.transform = CGAffineTransform(scaleX: 1, y: 1)
         }
     }
     
@@ -146,13 +154,14 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
                 image.getParameters()?.objectDistance = self.objectDistance
                 image.getParameters()?.atmosphericTemperature = self.atmosphericTemperature
                 image.getParameters()?.relativeHumidity = self.relativeHumidity
-                let para = image.getParameters()
-                print("ems: \(para!.emissivity), D: \(para!.objectDistance), Humid: \(para!.relativeHumidity), temp: \(para!.atmosphericTemperature)")
+                //let para = image.getParameters()
+                //print("ems: \(para!.emissivity), D: \(para!.objectDistance), Humid: \(para!.relativeHumidity), temp: \(para!.atmosphericTemperature)")
                 let fusion:FLIRFusion! = self.image.getFusion()
                 self.image.palette = self.pm.rainbow
                 //image.rotate(RotationAngle(rawValue: 0)!)
                 fusion.setFusionMode(IR_MODE)
                 let irImage:UIImage! = self.image.getImage()
+                self.photo = irImage
                 fusion.setFusionMode(VISUAL_MODE)
                 let colorImage:UIImage! = self.image.getImage()
                 image.setTemperatureUnit(TemperatureUnit(rawValue: 0)!)
@@ -214,6 +223,7 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
             let foreheadBox = facebox.getForeheadBox()
             let foreheadBoxLayer = CAShapeLayer()
             let label = facebox.getLabel()
+            self.type = label
             var tempLabel = UILabel()
             var color:UIColor = UIColor.green
             
@@ -275,24 +285,50 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
                 return
             }
             
+            if reading > self.reading{
+                self.reading = reading
+            }
             
             tempLabel = UILabel(frame: (CGRect(origin: CGPoint(x: bBox.midX, y: bBox.minY), size: CGSize(width:50,height:20))))
             
             tempLabel.text = "\(String(format: "%.1f", (reading) ))"
             //color
-            if reading > 37.5{
+            if !facebox.hasForeheadBox(){
+                color = UIColor.gray
+                foreheadFrameCounted = 0
+            }
+            else if reading > 37.5{
                 color = UIColor.red
+                foreheadFrameCounted += 1
             }else if label == "without_mask" || label == "mask_weared_incorrect"{
                 color = UIColor.yellow
+                foreheadFrameCounted += 1
             }else{
-                color = UIColor.gray
+                color = UIColor.green
+                foreheadFrameCounted += 1
+            }
+            self.color = color
+            
+            if foreheadFrameCounted >= 5 && !isShowingResult && mode == 1
+            {
+                isShowingResult = true
+                self.performSegue(withIdentifier: "goToResult", sender: self)
+                self.reading = 0
+            }else if isShowingResult{
+                self.reading = 0
+                foreheadFrameCounted = 0
+            }else if mode == 0{
+                self.reading = 0
+                foreheadFrameCounted = 0
             }
 
             
             foreheadBoxLayer.borderColor = color.cgColor
             faceBoxLayer.borderColor = color.cgColor
             tempLabel.textColor = color
-            
+            if flip == 1{
+                tempLabel.transform = CGAffineTransform(scaleX: -1, y: 1)
+            }
             
 
             
@@ -323,10 +359,21 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
 
      }
     
-
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "goToResult"{
+            let resultVC = segue.destination as! ResultViewController
+            resultVC.dismiss(animated: false, completion: nil)
+            resultVC.type = self.type
+            resultVC.temp = self.reading
+            resultVC.image = self.photo
+            resultVC.color = self.color
+            resultVC.mainController = self
+        }
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        definesPresentationContext = true
         // Do any additional setup after loading the view.
         camera.delegate = self
         discovery.delegate = self
@@ -372,9 +419,9 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
             fatalError("Cannot create model")
         }
     }()
-
+    
     @IBAction func e_textChanged(_ sender: UITextField) {
-        var currentValue = Float(sender.text!)
+        let currentValue = Float(sender.text!)
         if (currentValue! > 1 || currentValue! < 0) {
             e_text.text = "1.0"
         }else{
@@ -384,7 +431,7 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
     }
     
     @IBAction func at_textChanged(_ sender: UITextField) {
-        var currentValue = Float(sender.text!)
+        let currentValue = Float(sender.text!)
         if (currentValue! > 40 || currentValue! < -10) {
             at_text.text = "25.0"
         }else{
@@ -394,7 +441,7 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
     }
     
     @IBAction func rh_textChanged(_ sender: UITextField) {
-        var currentValue = Float(sender.text!)
+        let currentValue = Float(sender.text!)
         if (currentValue! >= 100 || currentValue! <= 0) {
             rh_text.text = "50"
         }else{
@@ -404,36 +451,40 @@ class ViewController: UIViewController, FLIRDiscoveryEventDelegate, FLIRDataRece
     }
     
     func getRange() ->Float{
-        var currentValue = Float(e_text.text!)
+        let currentValue = Float(e_text.text!)
         return currentValue!
     }
     func getATemp()->Float{
-        var currentValue = Float(at_text.text!)
+        let currentValue = Float(at_text.text!)
         return currentValue!
     }
     func getRH()->Float{
-        var currentValue = Float(rh_text.text!)
+        let currentValue = Float(rh_text.text!)
         return currentValue!
     }
-    /*
-    private func changeChargingLabel(state2 : FLIRChargingState){
-        guard let state2 = self.camera.getRemoteControl()?.getBattery()?.getChargingState() else {return}
-        if (state2 == FLIRChargingState(rawValue: 1)){
-            chargingLabel.text = "Not charging"
-        }else if (state2 == FLIRChargingState(rawValue: 2)){
-            chargingLabel.text = "Charging"
-        }
-    }*/
     
     private func getBattery(){
         DispatchQueue.main.async {
             Timer.scheduledTimer(withTimeInterval: 10.0, repeats: true) { timer in
                 let percent = self.battery.getPercentage()
                 self.batteryLabel.text = "\(String(percent))"
+                let charging = self.battery.getChargingState()
+                if charging == FLIRChargingState.MANAGEDCHARGING{
+                    self.chargingLabel.text = "Charging"
+                }else{
+                    self.chargingLabel.text = "Not Charging"
+                }
             }
         }
     }
     
+    @IBAction func modeSwitch(_ sender: Any) {
+        if mode == 0{
+            mode = 1
+        }else{
+            mode = 0
+        }
+    }
     
 }
 
@@ -461,6 +512,14 @@ class FaceBox{
     
     func getLabel() -> String{
         return self.label
+    }
+    
+    func hasForeheadBox() -> Bool{
+        if self.foreheadBox.midX != 0{
+            return true
+        }else{
+            return false
+        }
     }
     
 }
